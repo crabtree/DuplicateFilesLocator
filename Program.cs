@@ -28,16 +28,11 @@ namespace DuplicateFilesLocator
 
             if (Program.FilesCounter.Any(f => f.Value.Amount > 1))
             {
-                foreach (var item in Program.FilesCounter)
+                var duplicatedFiles = Program.FilesCounter.Where(f => f.Value.Amount > 1).ToArray();
+                foreach (var item in duplicatedFiles)
                 {
-                    if (item.Value.Amount > 1)
-                    {
-                        Console.WriteLine(String.Format("Duplicate found: {0}", item.Value.Amount));
-                        foreach (var path in item.Value.Paths)
-                        {
-                            Console.WriteLine(String.Format("File: {0}", path));
-                        }
-                    }
+                    Console.WriteLine(String.Format("Duplicate found: {0}", item.Value.Amount));
+                    item.Value.Paths.ForEach((path) => Console.WriteLine(String.Format("File: {0}", path)));
                 }
             }
             else
