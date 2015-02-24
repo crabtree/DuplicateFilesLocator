@@ -56,11 +56,18 @@ namespace DuplicateFilesLocator
         {
             if (!directory.Exists) return;
 
-            var innerDirectories = directory.GetDirectories();
-            PerformDirectoryAction(innerDirectories);
+            try
+            {
+                var innerDirectories = directory.GetDirectories();
+                PerformDirectoryAction(innerDirectories);
 
-            var innerFiles = directory.GetFiles();
-            PerformFileAction(innerFiles);
+                var innerFiles = directory.GetFiles();
+                PerformFileAction(innerFiles);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
 
         private static void PerformFileAction(IEnumerable<FileInfo> files)
@@ -75,16 +82,29 @@ namespace DuplicateFilesLocator
         {
             if (!file.Exists) return;
 
-            var fileBytes = GetFileBytes(file);
-            var fileHash = ComputeFileHash(fileBytes);
+            byte[] fileBytes = null;
+            string fileHash = null;
 
-            if (Program.FilesCounter.ContainsKey(fileHash))
+            try
             {
-                Program.FilesCounter[fileHash].AddItem(file.FullName);
+                fileBytes = GetFileBytes(file);
+                fileHash = ComputeFileHash(fileBytes);
             }
-            else
+            catch(Exception ex)
             {
-                Program.FilesCounter[fileHash] = new FileComputed(fileHash, file.FullName);
+                Console.WriteLine(ex);
+            }
+
+            if (!String.IsNullOrEmpty(fileHash))
+            {
+                if (Program.FilesCounter.ContainsKey(fileHash))
+                {
+                    Program.FilesCounter[fileHash].AddItem(file.FullName);
+                }
+                else
+                {
+                    Program.FilesCounter[fileHash] = new FileComputed(fileHash, file.FullName);
+                }
             }
         }
 
